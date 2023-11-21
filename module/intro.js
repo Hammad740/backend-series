@@ -12,6 +12,7 @@ Third-party Modules
 
 //// modules are encapsulated code
 //// commonjs - every file in nodejs is a module(by default)
+require('./mindgrenade');
 const john = 'john';
 const peter = 'peter';
 const sayHi = (name) => {
