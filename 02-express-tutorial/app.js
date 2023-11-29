@@ -45,18 +45,66 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-
+const { products } = require('./data.js');
 //// setup static and middleware
 app.use(express.static('./public'));
 
 app.get('/', (req, res) => {
-  res.status(200).send('Home Page');
+  res
+    .status(200)
+    .send('<h1>Home Page</h1><a href="/api/products">Products</a>');
 });
 
+app.get('/api/products', (req, res) => {
+  const newProduct = products.map((product) => {
+    const { id, name, image } = product;
+    return { id, name, image };
+  });
+  res.status(200).json(newProduct);
+});
+//? route parameters
+//// whenever think of route parameters think of placeholders,whrer user provides some data and with the help of res and req and some kind of logic we can make our life easier.
+
+app.get('/api/products/:productID', (req, res) => {
+  // console.log(req);
+  // console.log(req.params);
+  const { productID } = req.params;
+  const singleProduct = products.find(
+    (product) => product.id === Number(productID)
+  );
+  if (!singleProduct) {
+    return res.status(404).send('Product does not exists');
+  }
+  res.json(singleProduct);
+});
+
+app.get('/api/v1/query', (req, res) => {
+  console.log(req.query);
+
+  const { search, limit } = req.query;
+
+  let sortedProducts = [...products];
+  if (search) {
+    sortedProducts = sortedProducts.filter((product) => {
+      return product.name.startsWith(search);
+    });
+  }
+  if (limit) {
+    sortedProducts = sortedProducts.slice(0, Number(limit));
+  }
+  if (sortedProducts.length < 1) {
+    // res.status(200).send('No products match your search');
+    res.status(200).send({ success: true, data: [] });
+  }
+  res.status(200).json(sortedProducts);
+});
 app.get('/about', (req, res) => {
   res.status(200).send('Home Page');
 });
 
+app.get('/products', (req, res) => {
+  res.json(products);
+});
 app.get('/navbar', (req, res) => {
   res.sendFile(path.resolve(__dirname, './navbar-app/index.html'));
 });
